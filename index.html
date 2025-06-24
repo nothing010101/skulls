@@ -110,7 +110,7 @@
             text-shadow: 0 0 8px var(--primary-green);
         }
 
-        .call-to-action, button {
+        .call-to-action, .buy-button, button {
             background-color: var(--primary-green);
             color: var(--dark-bg);
             border: none;
@@ -122,9 +122,11 @@
             transition: background-color 0.3s ease, box-shadow 0.3s ease;
             display: block; /* Allows CTA button to be centered with auto margins */
             margin: 1.5rem auto 0;
+            text-decoration: none; /* For buy button link */
+            text-align: center;
         }
 
-        .call-to-action:hover, button:hover {
+        .call-to-action:hover, .buy-button:hover, button:hover {
             background-color: #00e600; /* Slightly darker on hover */
             box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
         }
@@ -184,6 +186,31 @@
             margin-top: 1rem;
             text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
         }
+        
+        /* Countdown and Staking Status */
+        .staking-info {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--primary-green);
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+        }
+
+        #countdown {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin-top: 1rem;
+        }
+
+        .simulation-warning {
+            color: yellow;
+            font-weight: bold;
+            margin-top: 1rem;
+            padding: 0.5rem;
+            background-color: rgba(255, 255, 0, 0.1);
+            border: 1px solid yellow;
+            border-radius: 5px;
+        }
+
 
         /* Social media icons */
         .social-icons {
@@ -260,7 +287,14 @@
         <section id="hero">
             <h2>Secure Your Assets, Earn Rewards</h2>
             <p>Safely stake your digital assets on our futuristic platform.</p>
-            <button class="call-to-action">Start Staking Now!</button>
+            <a href="https://creator.bid" target="_blank" class="buy-button">Buy CryptoSkulls Tokens</a>
+            <button class="call-to-action">Explore Staking</button>
+        </section>
+
+        <section class="staking-info">
+            <h3>Staking Launch In:</h3>
+            <div id="countdown"></div>
+            <p class="simulation-warning">Staking is not yet live. This is currently a simulation for demonstration purposes only.</p>
         </section>
 
         <section id="project">
@@ -272,7 +306,7 @@
         <section id="staking">
             <h3>Our Staking Feature</h3>
             <div class="staking-module">
-                <p>connect wallet to started.</p>
+                <p>Connect your wallet to begin.</p>
                 <button id="connectWallet">Connect Wallet</button>
                 <div id="stakingForm" style="display:none;">
                     <label for="amount">Staking Amount:</label>
@@ -328,8 +362,7 @@
             <h3>Contact Us</h3>
             <p>Have questions or need support? Reach out to us through our channels:</p>
             <div class="social-icons">
-                </a>
-                <a href="https://twitter.com/0x00deadly" target="_blank" aria-label="Follow us on X (Twitter)">
+                <a href="https://twitter.com/CryptoSkullsX" target="_blank" aria-label="Follow us on X (Twitter)">
                     <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/X_logo_2023.svg/200px-X_logo_2023.svg.png" alt="X (Twitter)">
                 </a>
             </div>
@@ -406,12 +439,9 @@
             const calculateButton = document.getElementById('calculateButton');
             const calculatedRewardSpan = document.getElementById('calculatedReward');
 
-
             let walletConnected = false; // Simulated wallet connection status
 
             connectWalletBtn.addEventListener('click', () => {
-                // In a real application, you'd use a Web3 library (e.g., Ethers.js, Web3.js)
-                // to connect to a user's crypto wallet like MetaMask.
                 alert('Connecting wallet... (Simulation)');
                 walletConnected = true;
                 connectWalletBtn.style.display = 'none';
@@ -440,8 +470,6 @@
                 resultMessage.textContent = `Processing staking of ${amount} units for ${duration} days...`;
 
                 setTimeout(() => {
-                    // Simulate successful staking
-                    // Note: This is a placeholder calculation. Real staking rewards vary.
                     const apr = parseFloat(calcAPRInput.value) / 100; // Get APR from calculator, convert to decimal
                     const dailyRate = apr / 365;
                     const totalReward = amount * dailyRate * duration;
@@ -455,7 +483,6 @@
             // --- Staking Calculator Logic ---
             calculateButton.addEventListener('click', calculatePotentialRewards);
 
-            // Also update on input change for a more interactive experience
             calcAmountInput.addEventListener('input', calculatePotentialRewards);
             calcDurationInput.addEventListener('input', calculatePotentialRewards);
             calcAPRInput.addEventListener('input', calculatePotentialRewards);
@@ -471,10 +498,7 @@
                     return;
                 }
 
-                // Convert APR to daily rate
                 const dailyRate = (apr / 100) / 365; // Convert % to decimal, then to daily
-
-                // Calculate potential reward
                 const potentialReward = amount * dailyRate * duration;
 
                 calculatedRewardSpan.textContent = `Potential Reward: ${potentialReward.toFixed(4)} Units`;
@@ -483,6 +507,41 @@
 
             // Initial calculation on load
             calculatePotentialRewards();
+
+            // --- Countdown Timer Logic ---
+            const countdownElement = document.getElementById('countdown');
+            // Set the launch date to 3 days from now (current time in WIB assumed as June 24, 2025 3:24:00 PM)
+            // For a fixed 3 days from June 24, 2025 3:24:00 PM WIB, that would be June 27, 2025 3:24:00 PM WIB.
+            // JavaScript Date object handles timezones, but it's safer to specify UTC or convert accurately.
+            // Let's use a fixed target date for consistency, or dynamically calculate from current time.
+
+            // To make it exactly 3 days from the moment the script runs:
+            const launchDate = new Date();
+            launchDate.setDate(launchDate.getDate() + 3);
+
+            // Alternatively, to set a specific fixed date (e.g., June 27, 2025, 15:24:00 WIB)
+            // const launchDate = new Date('2025-06-27T15:24:00+07:00'); // +07:00 for WIB
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = launchDate.getTime() - now;
+
+                if (distance < 0) {
+                    clearInterval(countdownInterval);
+                    countdownElement.innerHTML = "STAKING IS LIVE!";
+                    return;
+                }
+
+                const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                countdownElement.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+            }
+
+            const countdownInterval = setInterval(updateCountdown, 1000);
+            updateCountdown(); // Call once immediately to avoid delay
         });
     </script>
     </body>
