@@ -505,22 +505,13 @@
                 calculatedRewardSpan.style.color = 'var(--primary-green)';
             }
 
-            // Initial calculation on load
-            calculatePotentialRewards();
-
-            // --- Countdown Timer Logic ---
+            // --- Countdown Timer Logic (Fixed Date) ---
             const countdownElement = document.getElementById('countdown');
-            // Set the launch date to 3 days from now (current time in WIB assumed as June 24, 2025 3:24:00 PM)
-            // For a fixed 3 days from June 24, 2025 3:24:00 PM WIB, that would be June 27, 2025 3:24:00 PM WIB.
-            // JavaScript Date object handles timezones, but it's safer to specify UTC or convert accurately.
-            // Let's use a fixed target date for consistency, or dynamically calculate from current time.
 
-            // To make it exactly 3 days from the moment the script runs:
-            const launchDate = new Date();
-            launchDate.setDate(launchDate.getDate() + 3);
-
-            // Alternatively, to set a specific fixed date (e.g., June 27, 2025, 15:24:00 WIB)
-            // const launchDate = new Date('2025-06-27T15:24:00+07:00'); // +07:00 for WIB
+            // Set the launch date to 3 days from the current date and time (Tuesday, June 24, 2025 at 3:27:56 PM WIB)
+            // Target: Friday, June 27, 2025 at 3:27:56 PM WIB (GMT+7)
+            // Use 'YYYY-MM-DDTHH:mm:ss+ZZ:ZZ' format for reliable parsing
+            const launchDate = new Date('2025-06-27T15:27:56+07:00'); 
 
             function updateCountdown() {
                 const now = new Date().getTime();
@@ -529,6 +520,8 @@
                 if (distance < 0) {
                     clearInterval(countdownInterval);
                     countdownElement.innerHTML = "STAKING IS LIVE!";
+                    // Optionally, hide the simulation warning here
+                    document.querySelector('.simulation-warning').style.display = 'none'; 
                     return;
                 }
 
