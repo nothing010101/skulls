@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green Skull Staking</title>
+    
+    <style>
+        :root {
+            --primary-green: #00ff00; /* Neon Green */
+            --dark-bg: #1a1a1a;
+            --medium-gray: #333;
+            --light-gray: #ccc;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif; /* Replace with your preferred font */
+            background-color: var(--dark-bg);
+            color: var(--light-gray);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevent unwanted horizontal scroll */
+            position: relative; /* Important for canvas positioning */
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1; /* Ensure it's behind content */
+            opacity: 0.2; /* Adjust transparency to not be too dominant */
+        }
+
+        header {
+            background-color: rgba(0, 0, 0, 0.7); /* Transparent background for header */
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--primary-green);
+            position: relative;
+            z-index: 10; /* Ensure it's above the canvas */
+        }
+
+        .logo h1 {
+            color: var(--primary-green);
+            margin: 0;
+            font-size: 2rem;
+            text-shadow: 0 0 10px var(--primary-green); /* Glow effect */
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+        }
+
+        nav ul li a {
+            color: var(--light-gray);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease, text-shadow 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-green);
+            text-shadow: 0 0 8px var(--primary-green);
+        }
+
+        /* CA Address Styling */
+        .ca-address-bar {
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 0.7rem 2rem;
+            text-align: center;
+            color: var(--primary-green);
+            font-family: 'monospace', 'Courier New', monospace; /* Monospace font for code-like appearance */
+            font-size: 1.1rem;
+            border-bottom: 1px solid var(--primary-green);
+            box-shadow: 0 2px 10px rgba(0, 255, 0, 0.2);
+            position: relative;
+            z-index: 9; /* Slightly below header */
+        }
+
+        main {
+            padding: 2rem;
+            position: relative;
+            z-index: 1; /* Ensure it's above the canvas */
+        }
+
+        section {
+            margin-bottom: 4rem;
+            background-color: rgba(0, 0, 0, 0.5); /* Transparent background for section */
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid var(--primary-green);
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.3); /* Glow effect */
+        }
+
+        h2, h3 {
+            color: var(--primary-green);
+            text-align: center;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 8px var(--primary-green);
+        }
+
+        .call-to-action, button {
+            background-color: var(--primary-green);
+            color: var(--dark-bg);
+            border: none;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            display: block; /* Allows CTA button to be centered with auto margins */
+            margin: 1.5rem auto 0;
+        }
+
+        .call-to-action:hover, button:hover {
+            background-color: #00e600; /* Slightly darker on hover */
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.6);
+        }
+
+        /* Staking module styling */
+        .staking-module {
+            text-align: center;
+            padding: 2rem;
+            background-color: rgba(26, 26, 26, 0.7);
+            border-radius: 8px;
+            border: 1px solid #00e600;
+        }
+
+        .staking-module label {
+            display: block;
+            margin-top: 1rem;
+            color: var(--primary-green);
+            font-weight: bold;
+        }
+
+        .staking-module input, .staking-module select {
+            width: calc(100% - 20px);
+            padding: 0.8rem;
+            margin-top: 0.5rem;
+            background-color: var(--medium-gray);
+            border: 1px solid var(--primary-green);
+            color: var(--light-gray);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .staking-module button {
+            margin-top: 1.5rem;
+        }
+
+        #resultMessage {
+            margin-top: 1rem;
+            color: var(--primary-green);
+            font-weight: bold;
+        }
+
+        /* Staking Calculator Styling */
+        .staking-calculator {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px dashed var(--primary-green); /* Separator */
+        }
+
+        .staking-calculator p {
+            margin-bottom: 0.5rem;
+        }
+
+        .calculator-result {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-top: 1rem;
+            text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        /* Social media icons */
+        .social-icons {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+        }
+
+        .social-icons a {
+            display: inline-block;
+            transition: transform 0.2s ease;
+        }
+
+        .social-icons a:hover {
+            transform: scale(1.1);
+        }
+
+        .social-icons img {
+            width: 40px; /* Adjust size as needed */
+            height: 40px;
+            filter: drop-shadow(0 0 5px var(--primary-green)); /* Green glow for icons */
+        }
+
+        footer {
+            text-align: center;
+            padding: 1.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            border-top: 1px solid var(--primary-green);
+            color: var(--light-gray);
+            margin-top: 2rem;
+        }
+
+        /* Basic Responsiveness */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            nav ul {
+                margin-top: 1rem;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+    </head>
+<body>
+    <canvas id="matrixCanvas"></canvas> <header>
+        <nav>
+            <div class="logo">
+                <h1>CryptoSkulls Staking</h1>
+            </div>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#project">Project</a></li>
+                <li><a href="#staking">Staking</a></li>
+                <li><a href="#faq">FAQ</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="ca-address-bar">
+        CA: 0X0000000000000000000000000000000000000000 
+        </div>
+
+    <main>
+        <section id="hero">
+            <h2>Secure Your Assets, Earn Rewards</h2>
+            <p>Safely stake your digital assets on our futuristic platform.</p>
+            <button class="call-to-action">Start Staking Now!</button>
+        </section>
+
+        <section id="project">
+            <h3>The CryptoSkulls Project</h3>
+            <p><strong>CryptoSkulls</strong> is more than just a staking platform; it's a community-driven initiative at the intersection of digital art, blockchain technology, and decentralized finance. Our vision is to create a unique ecosystem where users can engage with exclusive NFT (Non-Fungible Token) collections, participate in innovative DeFi mechanisms like staking, and contribute to the growth of a vibrant, interconnected digital world.</p>
+            <p>We aim to blend the allure of collectible digital art with tangible utility, offering holders not just ownership of rare digital assets but also opportunities to earn passive income and actively shape the project's future through governance. Join us as we build the next frontier of Web3 innovation, empowering our community with cutting-edge tools and a shared passion for the digital realm.</p>
+        </section>
+
+        <section id="staking">
+            <h3>Our Staking Feature</h3>
+            <div class="staking-module">
+                <p>connect wallet to started.</p>
+                <button id="connectWallet">Connect Wallet</button>
+                <div id="stakingForm" style="display:none;">
+                    <label for="amount">Staking Amount:</label>
+                    <input type="number" id="amount" placeholder="0.00">
+                    <label for="duration">Staking Duration:</label>
+                    <select id="duration">
+                        <option value="30">30 Days</option>
+                        <option value="60">60 Days</option>
+                        <option value="90">90 Days</option>
+                    </select>
+                    <button id="stakeButton">Stake Now</button>
+                    <p id="resultMessage"></p>
+                </div>
+
+                <div class="staking-calculator">
+                    <h4>Staking Calculator</h4>
+                    <p>Estimate your potential earnings:</p>
+                    <label for="calcAmount">Staking Amount:</label>
+                    <input type="number" id="calcAmount" placeholder="100">
+                    <label for="calcDuration">Duration (Days):</label>
+                    <input type="number" id="calcDuration" value="90" min="1">
+                    <label for="calcAPR">Annual Percentage Rate (APR):</label>
+                    <input type="number" id="calcAPR" value="5" min="0.1" step="0.1"> <button id="calculateButton">Calculate Potential Rewards</button>
+                    <p class="calculator-result" id="calculatedReward">Potential Reward: 0.00 Units</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <h3>What is Staking?</h3>
+            <p>Staking is a way to earn rewards for holding certain cryptocurrencies. By locking up your assets, you help support the security and operations of a blockchain network. In return, you receive additional cryptocurrency as a reward. It's similar to earning interest in a traditional savings account, but with crypto assets and potentially higher returns.</p>
+            <h4>Why Should You Stake?</h4>
+            <ul>
+                <li>**Earn Passive Income:** Staking allows your crypto holdings to grow over time without actively trading.</li>
+                <li>**Support Network Security:** By staking, you contribute to the validation of transactions and the overall security of the blockchain.</li>
+                <li>**Participate in Governance:** Some staking mechanisms give you voting rights on network decisions.</li>
+                <li>**Simple and Accessible:** For many, staking is a more straightforward way to earn crypto rewards compared to mining.</li>
+            </ul>
+        </section>
+
+        <section id="faq">
+            <h3>Frequently Asked Questions</h3>
+            <p>Here you would add common questions and answers about staking, e.g.:</p>
+            <ul>
+                <li>**How do I connect my wallet?** (e.g., using MetaMask)</li>
+                <li>**What are the minimum/maximum staking amounts?**</li>
+                <li>**How are rewards calculated?**</li>
+                <li>**Can I unstake my assets early?** (Explain lock-up periods)</li>
+            </ul>
+        </section>
+
+        <section id="contact">
+            <h3>Contact Us</h3>
+            <p>Have questions or need support? Reach out to us through our channels:</p>
+            <div class="social-icons">
+                <a href="https://t.me/CryptoSkullsOfficial" target="_blank" aria-label="Join our Telegram">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/200px-Telegram_logo.svg.png" alt="Telegram">
+                </a>
+                <a href="https://twitter.com/CryptoSkullsX" target="_blank" aria-label="Follow us on X (Twitter)">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ce/X_logo_2023.svg/200px-X_logo_2023.svg.png" alt="X (Twitter)">
+                </a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 CryptoSkulls Staking. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        // Matrix Rain Effect (matrix.js equivalent)
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const katakana = 'アァカサタナハマヤラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユルゴゾドボポヴッン';
+        const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const nums = '0123456789';
+        const chars = katakana + latin + nums;
+
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+
+        const drops = [];
+        for (let i = 0; i < columns; i++) {
+            drops[i] = 1;
+        }
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00ff00'; // Neon green color
+            ctx.font = fontSize + 'px monospace'; // Monospace font is important
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(drawMatrix, 35); // Speed of the matrix effect
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const newColumns = canvas.width / fontSize;
+            for (let i = 0; i < newColumns; i++) {
+                if (!drops[i]) drops[i] = 1;
+            }
+        });
+
+        // Staking Logic (app.js equivalent)
+        document.addEventListener('DOMContentLoaded', () => {
+            const connectWalletBtn = document.getElementById('connectWallet');
+            const stakingFormDiv = document.getElementById('stakingForm');
+            const stakeButton = document.getElementById('stakeButton');
+            const amountInput = document.getElementById('amount');
+            const durationSelect = document.getElementById('duration');
+            const resultMessage = document.getElementById('resultMessage');
+
+            // Calculator elements
+            const calcAmountInput = document.getElementById('calcAmount');
+            const calcDurationInput = document.getElementById('calcDuration');
+            const calcAPRInput = document.getElementById('calcAPR');
+            const calculateButton = document.getElementById('calculateButton');
+            const calculatedRewardSpan = document.getElementById('calculatedReward');
+
+
+            let walletConnected = false; // Simulated wallet connection status
+
+            connectWalletBtn.addEventListener('click', () => {
+                // In a real application, you'd use a Web3 library (e.g., Ethers.js, Web3.js)
+                // to connect to a user's crypto wallet like MetaMask.
+                alert('Connecting wallet... (Simulation)');
+                walletConnected = true;
+                connectWalletBtn.style.display = 'none';
+                stakingFormDiv.style.display = 'block';
+                resultMessage.textContent = 'Wallet successfully connected!';
+                resultMessage.style.color = 'var(--primary-green)';
+            });
+
+            stakeButton.addEventListener('click', () => {
+                if (!walletConnected) {
+                    resultMessage.textContent = 'Please connect your wallet first!';
+                    resultMessage.style.color = 'red';
+                    return;
+                }
+
+                const amount = parseFloat(amountInput.value);
+                const duration = parseInt(durationSelect.value);
+
+                if (isNaN(amount) || amount <= 0) {
+                    resultMessage.textContent = 'Please enter a valid staking amount!';
+                    resultMessage.style.color = 'red';
+                    return;
+                }
+                
+                resultMessage.style.color = 'var(--primary-green)';
+                resultMessage.textContent = `Processing staking of ${amount} units for ${duration} days...`;
+
+                setTimeout(() => {
+                    // Simulate successful staking
+                    // Note: This is a placeholder calculation. Real staking rewards vary.
+                    const apr = parseFloat(calcAPRInput.value) / 100; // Get APR from calculator, convert to decimal
+                    const dailyRate = apr / 365;
+                    const totalReward = amount * dailyRate * duration;
+                    
+                    resultMessage.textContent = `Success! You have staked ${amount} units for ${duration} days. Estimated reward: ${totalReward.toFixed(4)} Units.`;
+                    alert('Staking Successful!');
+                    amountInput.value = ''; // Reset input
+                }, 3000); // Simulate a 3-second processing time
+            });
+
+            // --- Staking Calculator Logic ---
+            calculateButton.addEventListener('click', calculatePotentialRewards);
+
+            // Also update on input change for a more interactive experience
+            calcAmountInput.addEventListener('input', calculatePotentialRewards);
+            calcDurationInput.addEventListener('input', calculatePotentialRewards);
+            calcAPRInput.addEventListener('input', calculatePotentialRewards);
+
+            function calculatePotentialRewards() {
+                const amount = parseFloat(calcAmountInput.value);
+                const duration = parseFloat(calcDurationInput.value);
+                const apr = parseFloat(calcAPRInput.value); // Annual Percentage Rate (e.g., 5 for 5%)
+
+                if (isNaN(amount) || amount <= 0 || isNaN(duration) || duration <= 0 || isNaN(apr) || apr < 0) {
+                    calculatedRewardSpan.textContent = 'Please enter valid numbers.';
+                    calculatedRewardSpan.style.color = 'red';
+                    return;
+                }
+
+                // Convert APR to daily rate
+                const dailyRate = (apr / 100) / 365; // Convert % to decimal, then to daily
+
+                // Calculate potential reward
+                const potentialReward = amount * dailyRate * duration;
+
+                calculatedRewardSpan.textContent = `Potential Reward: ${potentialReward.toFixed(4)} Units`;
+                calculatedRewardSpan.style.color = 'var(--primary-green)';
+            }
+
+            // Initial calculation on load
+            calculatePotentialRewards();
+        });
+    </script>
+    </body>
+</html>
